@@ -1,0 +1,36 @@
+---
+title: "Final_DataW"
+output: word_document
+---
+Importing the data using the RODBC package:
+
+```{r}
+library("RODBC")
+myconn<- odbcConnect("dartmouth1", "jlima", "jlima@qbs181")
+demographics <- sqlQuery(myconn, "select * from [dbo].[Demographics]")
+ChronicConditions <- sqlQuery(myconn, "select * from [dbo].[ChronicConditions]")
+Text <- sqlQuery(myconn, "select * from [dbo].[Text]")
+```
+
+Merging tables Demographics, Chronic Conditions and TextMessages:
+
+```{r}
+library(tidyverse)
+colnames(ChronicConditions)[1] <- "contactid"
+str(ChronicConditions)
+merged_final <- inner_join(demographics, ChronicConditions, by = "contactid")
+colnames(Text)[1] <- "contactid"
+merged_final <- inner_join(merged_final, Text, by = "contactid")
+View(merged_final)
+str(merged_final)
+```
+
+
+Choosing the latest date when the text was sent so I have 1 Row per ID:
+
+```{r}
+selected_merged_final <- group_by (merged_final, contactid)
+selected_merged_final <- slice(selected_merged_final, which.max(TextSentDate))
+View(selected_merged_final)
+str(selected_merged_final)
+```
