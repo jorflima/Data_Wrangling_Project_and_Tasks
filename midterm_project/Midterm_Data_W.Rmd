@@ -1,0 +1,358 @@
+---
+title: "Midterm_DataW"
+output: word_document
+---
+
+```{r}
+library("RODBC")
+myconn<- odbcConnect("dartmouth1", "jlima", "jlima@qbs181")
+midterm_1 <- sqlQuery(myconn, "select * from jlima.midterm_1")
+str(midterm_1)
+
+library (tidyverse)
+# Dropping my first column (made unecessary by the SEQN - Respondent sequence number column)
+midterm_1$`__` <- NULL
+
+# Renaming my columns
+midterm_1 <- rename (midterm_1, "Respondent Nr"=`_SEQN_`)
+midterm_1 <- rename (midterm_1, "Doctor told DB"=`_DIQ010_`)
+midterm_1 <- rename (midterm_1, "Diagnosis Age"=`_DID040_`)
+midterm_1 <- rename (midterm_1, "Risk Prediabetes"=`_DIQ160_`)
+midterm_1 <- rename (midterm_1, "Told risk DB"=`_DIQ170_`)
+midterm_1 <- rename (midterm_1, "Feel risk DB"=`_DIQ172_`)
+midterm_1 <- rename (midterm_1, "Family history"=`_DIQ175A_`)
+midterm_1 <- rename (midterm_1, "Overweight"=`_DIQ175B_`)
+midterm_1 <- rename (midterm_1, "Age"=`_DIQ175C_`)
+midterm_1 <- rename (midterm_1, "Poor diet"=`_DIQ175D_`)
+midterm_1 <- rename (midterm_1, "Race"=`_DIQ175E_`)
+midterm_1 <- rename (midterm_1, "Had a baby >9 lbs"=`_DIQ175F_`)
+midterm_1 <- rename (midterm_1, "Lack physical activity"=`_DIQ175G_`)
+midterm_1 <- rename (midterm_1, "High blood pressure"=`_DIQ175H_`)
+midterm_1 <- rename (midterm_1, "High blood sugar"=`_DIQ175I_`)
+midterm_1 <- rename (midterm_1, "High cholesterol"=`_DIQ175J_`)
+midterm_1 <- rename (midterm_1, "Hypoglycemic"=`_DIQ175K_`)
+midterm_1 <- rename (midterm_1, "Extreme hunger"=`_DIQ175L_`)
+midterm_1 <- rename (midterm_1, "Tingling/numbness hands/feet"=`_DIQ175M_`)
+midterm_1 <- rename (midterm_1, "Blurred vision"=`_DIQ175N_`)
+midterm_1 <- rename (midterm_1, "Increased fatigue"=`_DIQ175O_`)
+midterm_1 <- rename (midterm_1, "Anyone could be at risk"=`_DIQ175P_`)
+midterm_1 <- rename (midterm_1, "Doctor warning"=`_DIQ175Q_`)
+midterm_1 <- rename (midterm_1, "Other, specify"=`_DIQ175R_`)
+midterm_1 <- rename (midterm_1, "Gestational diabetes"=`_DIQ175S_`)
+midterm_1 <- rename (midterm_1, "Frequent urination"=`_DIQ175T_`)
+midterm_1 <- rename (midterm_1, "Thirst"=`_DIQ175U_`)
+midterm_1 <- rename (midterm_1, "Craving sweet/lot of sugar"=`_DIQ175V_`)
+midterm_1 <- rename (midterm_1, "Medication"=`_DIQ175W_`)
+midterm_1 <- rename (midterm_1, "Polycystic ovarian syndrome"=`_DIQ175X_`)
+midterm_1 <- rename (midterm_1, "Had blood tested past three years"=`_DIQ180_`)
+midterm_1 <- rename (midterm_1, "Taking insulin now"=`_DIQ050_`)
+midterm_1 <- rename (midterm_1, "How long taking insulin"=`_DID060_`)
+midterm_1 <- rename (midterm_1, "Insulin-Unit of measure (month/year)"=`_DIQ060U_`)
+midterm_1 <- rename (midterm_1, "DB pills to lower blood sugar"=`_DIQ070_`)
+midterm_1 <- rename (midterm_1, "How long ago saw a DB specialist"=`_DIQ230_`)
+midterm_1 <- rename (midterm_1, "Is there one Dr you see for DB"=`_DIQ240_`)
+midterm_1 <- rename (midterm_1, "Past year #times seen doctor"=`_DID250_`)
+midterm_1 <- rename (midterm_1, "How often check blood for glucose/sugar"=`_DID260_`)
+midterm_1 <- rename (midterm_1, "Check Blood-Unit of measure (day/week/month/year)"=`_DIQ260U_`)
+midterm_1 <- rename (midterm_1, "Past year Dr checked for A1C"=`_DIQ275_`)
+midterm_1 <- rename (midterm_1, "What was your last A1C level"=`_DIQ280_`)
+midterm_1 <- rename (midterm_1, "What does Dr say A1C should be"=`_DIQ291_`)
+midterm_1 <- rename (midterm_1, "What was your recent SBP"=`_DIQ300S_`)
+midterm_1 <- rename (midterm_1, "What was your recent DBP"=`_DIQ300D_`)
+midterm_1 <- rename (midterm_1, "What does Dr say SBP should be"=`_DID310S_`)
+midterm_1 <- rename (midterm_1, "What does Dr say DBP should be"=`_DID310D_`)
+midterm_1 <- rename (midterm_1, "What was most recent LDL nr"=`_DID320_`)
+midterm_1 <- rename (midterm_1, "What Dr say LDL should be"=`_DID330_`)
+midterm_1 <- rename (midterm_1, "Past year times Dr check feet for sores"=`_DID341_`)
+midterm_1 <- rename (midterm_1, "How often do you check your feet"=`_DID350_`)
+midterm_1 <- rename (midterm_1, "Check Feet-Unit of measure (day/week/month/year)"=`_DIQ350U_`)
+midterm_1 <- rename (midterm_1, "Last time pupils dilated exam"=`_DIQ360_`)
+midterm_1 <- rename (midterm_1, "DB affected eyes/retinopathy"=`_DIQ080_`)
+
+#altering the type of variable when appropiate, making the substitutions and tableing the results / counts
+
+midterm_1$`Doctor told DB` <- as.factor(midterm_1$`Doctor told DB`)
+levels(midterm_1$`Doctor told DB`) <- list("Yes"=1, "No"=2, "Borderline"=3, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`Doctor told DB`))
+
+
+#-- will not categorize the Diagnosis Age because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`Diagnosis Age` >= 2 & midterm_1$`Diagnosis Age` <= 78),])
+nrow(midterm_1[which(midterm_1$`Diagnosis Age` == 80),])
+nrow(midterm_1[which(midterm_1$`Diagnosis Age` ==  666),])
+nrow(midterm_1[which(midterm_1$`Diagnosis Age` == 777),])
+nrow(midterm_1[which(midterm_1$`Diagnosis Age` == 999),])
+
+#altering the type of variable when appropiate, making the substitutions and tableing the results / counts
+
+midterm_1$`Risk Prediabetes` <- as.factor(midterm_1$`Risk Prediabetes`)
+levels(midterm_1$`Risk Prediabetes`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`Risk Prediabetes`))
+
+
+midterm_1$`Told risk DB` <- as.factor(midterm_1$`Told risk DB`)
+levels(midterm_1$`Told risk DB`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`Told risk DB`))
+
+
+midterm_1$`Feel risk DB` <- as.factor(midterm_1$`Feel risk DB`)
+levels(midterm_1$`Feel risk DB`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`Feel risk DB`))
+
+
+midterm_1$`Family history` <- as.factor(midterm_1$`Family history`)
+levels(midterm_1$`Family history`) <- list("Family history"=10, "Refused"=77, "Don't know"=99)
+data.frame(table(midterm_1$`Family history`))
+
+
+midterm_1$`Overweight` <- as.factor(midterm_1$`Overweight`)
+levels(midterm_1$`Overweight`) <- list("Overweight"=11)
+data.frame(table(midterm_1$`Overweight`))
+
+
+midterm_1$`Age` <- as.factor(midterm_1$`Age`)
+levels(midterm_1$`Age`) <- list("Age"=12)
+data.frame(table(midterm_1$`Age`))
+
+midterm_1$`Poor diet` <- as.factor(midterm_1$`Poor diet`)
+levels(midterm_1$`Poor diet`) <- list("Poor Diet"=13)
+data.frame(table(midterm_1$`Poor diet`))
+
+
+midterm_1$`Race` <- as.factor(midterm_1$`Race`)
+levels(midterm_1$`Race`) <- list("Race"=14)
+data.frame(table(midterm_1$`Race`))
+
+
+midterm_1$`Had a baby >9 lbs` <- as.factor(midterm_1$`Had a baby >9 lbs`)	
+levels(midterm_1$`Had a baby >9 lbs`) <- list("Had a baby >9 lbs"=15)
+data.frame(table(midterm_1$`Had a baby >9 lbs`))
+
+midterm_1$`Lack physical activity` <- as.factor(midterm_1$`Lack physical activity`)
+levels(midterm_1$`Lack physical activity`) <- list("Lack physical activity"=16)
+data.frame(table(midterm_1$`Lack physical activity`))
+
+
+midterm_1$`High blood pressure` <- as.factor(midterm_1$`High blood pressure`)
+levels(midterm_1$`High blood pressure`) <- list("High blood pressure"=17)
+data.frame(table(midterm_1$`High blood pressure`))
+
+midterm_1$`High blood sugar` <- as.factor(midterm_1$`High blood sugar`)
+levels(midterm_1$`High blood sugar`) <- list("High blood sugar"=18)
+data.frame(table(midterm_1$`High blood sugar`))
+
+
+midterm_1$`High cholesterol` <- as.factor(midterm_1$`High cholesterol`)
+levels(midterm_1$`High cholesterol`) <- list("High cholesterol"=19)
+data.frame(table(midterm_1$`High cholesterol`))
+
+
+midterm_1$`Hypoglycemic` <- as.factor(midterm_1$`Hypoglycemic`)
+levels(midterm_1$`Hypoglycemic`) <- list("Hypoglycemic"=20)
+data.frame(table(midterm_1$`Hypoglycemic`))
+
+
+midterm_1$`Extreme hunger` <- as.factor(midterm_1$`Extreme hunger`)	
+levels(midterm_1$`Extreme hunger`) <- list("Yes"=21)
+data.frame(table(midterm_1$`Extreme hunger`))
+
+
+midterm_1$`Tingling/numbness hands/feet` <- as.factor(midterm_1$`Tingling/numbness hands/feet`)
+levels(midterm_1$`Tingling/numbness hands/feet`) <- list("Tingling/numbness in hands or feet"=22)
+data.frame(table(midterm_1$`Tingling/numbness hands/feet`))
+
+
+midterm_1$`Blurred vision` <- as.factor(midterm_1$`Blurred vision`)
+levels(midterm_1$`Blurred vision`) <- list("Blurred vision"=23)
+data.frame(table(midterm_1$`Blurred vision`))
+
+
+midterm_1$`Increased fatigue` <- as.factor(midterm_1$`Increased fatigue`)
+levels(midterm_1$`Increased fatigue`) <- list("Increased fatigue"=24)
+data.frame(table(midterm_1$`Increased fatigue`))
+
+
+midterm_1$`Anyone could be at risk` <- as.factor(midterm_1$`Anyone could be at risk`)
+levels(midterm_1$`Anyone could be at risk`) <- list("Anyone could be at risk"=25)
+data.frame(table(midterm_1$`Anyone could be at risk`))
+
+midterm_1$`Doctor warning` <- as.factor(midterm_1$`Doctor warning`)
+levels(midterm_1$`Doctor warning`) <- list("Doctor warning"=26)
+data.frame(table(midterm_1$`Doctor warning`))
+
+
+midterm_1$`Other, specify` <- as.factor(midterm_1$`Other, specify`)
+levels(midterm_1$`Other, specify`) <- list("Other, specify"=27)
+data.frame(table(midterm_1$`Other, specify`))
+
+midterm_1$`Gestational diabetes` <- as.factor(midterm_1$`Gestational diabetes`)
+levels(midterm_1$`Gestational diabetes`) <- list("Gestational diabetes"=28)
+data.frame(table(midterm_1$`Gestational diabetes`))
+
+
+midterm_1$`Frequent urination` <- as.factor(midterm_1$`Frequent urination`)
+levels(midterm_1$`Frequent urination`) <- list("Frequent urination"=29)
+data.frame(table(midterm_1$`Frequent urination`))
+
+
+midterm_1$`Thirst` <- as.factor(midterm_1$`Thirst`)						
+levels(midterm_1$`Thirst`) <- list("Thirst"=30)						
+data.frame(table(midterm_1$`Thirst`))
+
+midterm_1$`Craving sweet/lot of sugar` <- as.factor(midterm_1$`Craving sweet/lot of sugar`)	
+levels(midterm_1$`Craving sweet/lot of sugar`) <- list("Craving sweet/lot of sugar"=31)	
+data.frame(table(midterm_1$`Craving sweet/lot of sugar`))
+
+
+midterm_1$`Medication` <- as.factor(midterm_1$`Medication`)		
+levels(midterm_1$`Medication`) <- list("Medication"=32)	
+data.frame(table(midterm_1$`Medication`))
+
+
+midterm_1$`Polycystic ovarian syndrome` <- as.factor(midterm_1$`Polycystic ovarian syndrome`)
+levels(midterm_1$`Polycystic ovarian syndrome`) <- list("Polycystic ovarian syndrome"=33)	
+data.frame(table(midterm_1$`Polycystic ovarian syndrome`))
+
+
+midterm_1$`Had blood tested past three years` <- as.factor(midterm_1$`Had blood tested past three years`)
+levels(midterm_1$`Had blood tested past three years`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)		
+data.frame(table(midterm_1$`Had blood tested past three years`))
+
+midterm_1$`Taking insulin now` <- as.factor(midterm_1$`Taking insulin now`)	
+levels(midterm_1$`Taking insulin now`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`Taking insulin now`))
+
+
+midterm_1$`How long taking insulin` <- as.factor(midterm_1$`How long taking insulin`)
+levels(midterm_1$`How long taking insulin`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)	
+data.frame(table(midterm_1$`How long taking insulin`))
+
+
+#-- will not categorize How long taking insulin because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`How long taking insulin` >= 1 & midterm_1$`How long taking insulin` <= 55),])
+nrow(midterm_1[which(midterm_1$`How long taking insulin` ==  666),])
+nrow(midterm_1[which(midterm_1$`How long taking insulin` == 777),])
+nrow(midterm_1[which(midterm_1$`How long taking insulin` == 999),])
+
+
+midterm_1$`Insulin-Unit of measure (month/year)` <- as.factor(midterm_1$`Insulin-Unit of measure (month/year)`)
+levels(midterm_1$`Insulin-Unit of measure (month/year)`) <- list("Months"=1, "Years"=2)					
+data.frame(table(midterm_1$`Insulin-Unit of measure (month/year)`))
+
+
+midterm_1$`DB pills to lower blood sugar` <- as.factor(midterm_1$`DB pills to lower blood sugar`)
+levels(midterm_1$`DB pills to lower blood sugar`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`DB pills to lower blood sugar`))
+
+
+midterm_1$`How long ago saw a DB specialist` <- as.factor(midterm_1$`How long ago saw a DB specialist`)
+levels(midterm_1$`How long ago saw a DB specialist`) <- list("1 year ago or less"=1, "More than 1 year ago but no more than 2 years ago"=2, "More than 2 years ago but no more than 5 years ago"=3, "More than 5 years ago"=4, "Never"=5, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`How long ago saw a DB specialist`))
+
+
+midterm_1$`Is there one Dr you see for DB` <- as.factor(midterm_1$`Is there one Dr you see for DB`)
+levels(midterm_1$`Is there one Dr you see for DB`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`Is there one Dr you see for DB`))
+
+
+
+#-- will not categorize How long taking insulin because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`Past year #times seen doctor` >= 1 & midterm_1$`Past year #times seen doctor` <= 60),])
+nrow(midterm_1[which(midterm_1$`Past year #times seen doctor` ==  0),])
+nrow(midterm_1[which(midterm_1$`Past year #times seen doctor` == 7777),])
+nrow(midterm_1[which(midterm_1$`Past year #times seen doctor` == 9999),])
+
+
+#-- will not categorize How often check blood for glucose/sugar because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`How often check blood for glucose/sugar` >= 1 & midterm_1$`How often check blood for glucose/sugar` <= 15),])
+nrow(midterm_1[which(midterm_1$`How often check blood for glucose/sugar` ==  0),])
+nrow(midterm_1[which(midterm_1$`How often check blood for glucose/sugar` == 777),])
+nrow(midterm_1[which(midterm_1$`How often check blood for glucose/sugar` == 999),])
+
+
+
+midterm_1$`Past year Dr checked for A1C` <- as.factor(midterm_1$`Past year Dr checked for A1C`)
+levels(midterm_1$`Past year Dr checked for A1C`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`Past year Dr checked for A1C`))
+
+
+
+#-- will not categorize How often check blood for glucose/sugar because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`What was your last A1C level` >= 2 & midterm_1$`What was your last A1C level` <= 18.5),])
+nrow(midterm_1[which(midterm_1$`What was your last A1C level` == 7777),])
+nrow(midterm_1[which(midterm_1$`What was your last A1C level` == 9999),])
+
+
+#-- will not categorize What does Dr say A1C should be because it is a continuous variable, will just display the count
+midterm_1$`What does Dr say A1C should be` <- as.factor(midterm_1$`What does Dr say A1C should be`)
+levels(midterm_1$`What does Dr say A1C should be`) <- list("Less than 6"=1, "Less than 7"=2, "Less than 8"=3, "Less than 9"= 4,  "Less than 10" = 5, "Provider did not specify goal" = 6, "Dont Know"=9, "Refused"=77, "Don't know" = 99)
+data.frame(table(midterm_1$`What does Dr say A1C should be`))
+
+
+#-- will not categorize What was your recent SBP because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`What was your recent SBP` >= 80 & midterm_1$`What was your recent SBP` <= 201),])
+nrow(midterm_1[which(midterm_1$`What was your recent SBP` == 7777),])
+nrow(midterm_1[which(midterm_1$`What was your recent SBP` == 9999),])
+
+
+#-- will not categorize What was your recent DBP because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`What was your recent DBP` >= 17 & midterm_1$`What was your recent DBP` <= 251),])
+nrow(midterm_1[which(midterm_1$`What was your recent DBP` == 7777),])
+nrow(midterm_1[which(midterm_1$`What was your recent DBP` == 9999),])
+
+
+#-- will not categorize What does Dr say SBP should be because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`What does Dr say SBP should be` >= 80 & midterm_1$`What does Dr say SBP should be` <= 175),])
+nrow(midterm_1[which(midterm_1$`What does Dr say SBP should be` == 6666),])
+nrow(midterm_1[which(midterm_1$`What does Dr say SBP should be` == 7777),])
+nrow(midterm_1[which(midterm_1$`What does Dr say SBP should be` == 9999),])
+
+
+
+#-- will not categorize What does Dr say DBP should be because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`What does Dr say DBP should be` >= 18 & midterm_1$`What does Dr say DBP should be` <= 140),])
+nrow(midterm_1[which(midterm_1$`What does Dr say DBP should be` == 6666),])
+nrow(midterm_1[which(midterm_1$`What does Dr say DBP should be` == 7777),])
+nrow(midterm_1[which(midterm_1$`What does Dr say DBP should be` == 9999),])
+
+
+#-- will not categorize What was most recent LDL nr because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`What was most recent LDL nr` >= 4 & midterm_1$`What was most recent LDL nr` <= 520),])
+nrow(midterm_1[which(midterm_1$`What was most recent LDL nr` == 5555),])
+nrow(midterm_1[which(midterm_1$`What was most recent LDL nr` == 6666),])
+nrow(midterm_1[which(midterm_1$`What was most recent LDL nr` == 7777),])
+nrow(midterm_1[which(midterm_1$`What was most recent LDL nr` == 9999),])
+
+
+#-- will not categorize Past year times Dr check feet for sores because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`Past year times Dr check feet for sores` >= 1 & midterm_1$`Past year times Dr check feet for sores` <= 34),])
+nrow(midterm_1[which(midterm_1$`Past year times Dr check feet for sores` == 0),])
+nrow(midterm_1[which(midterm_1$`Past year times Dr check feet for sores` == 7777),])
+nrow(midterm_1[which(midterm_1$`Past year times Dr check feet for sores` == 9999),])
+
+
+#-- will not categorize How often do you check your feet because it is a continuous variable, will just display the count
+nrow(midterm_1[which(midterm_1$`How often do you check your feet` >= 1 & midterm_1$`How often do you check your feet` <= 20),])
+nrow(midterm_1[which(midterm_1$`How often do you check your feet` == 0),])
+nrow(midterm_1[which(midterm_1$`How often do you check your feet` == 7777),])
+nrow(midterm_1[which(midterm_1$`How often do you check your feet` == 9999),])
+
+
+midterm_1$`Check Feet-Unit of measure (day/week/month/year)` <- as.factor(midterm_1$`Check Feet-Unit of measure (day/week/month/year)`)	
+levels(midterm_1$`Check Feet-Unit of measure (day/week/month/year)`) <- list("Per day"=1, "Per week"=2, "Per month"=3, "Per year"=4)
+data.frame(table(midterm_1$`Check Feet-Unit of measure (day/week/month/year)`))
+
+
+midterm_1$`Last time pupils dilated exam` <- as.factor(midterm_1$`Last time pupils dilated exam`)	
+levels(midterm_1$`Last time pupils dilated exam`) <- list("Less than 1 month"=1, "1-12 months"=2, "13-24 months" =3, "Greater than 2 years" = 4, "Never" = 5, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`Last time pupils dilated exam`))
+
+
+midterm_1$`DB affected eyes/retinopathy` <- as.factor(midterm_1$`DB affected eyes/retinopathy`)
+levels(midterm_1$`DB affected eyes/retinopathy`) <- list("Yes"=1, "No"=2, "Refused"=7, "Dont Know"=9)
+data.frame(table(midterm_1$`DB affected eyes/retinopathy`))
+
+
+####################################
+```
+
