@@ -1,0 +1,223 @@
+---
+title: "Jorge Lima HW_3 QBS 181"
+output: word_document
+---
+
+
+Loading up the tidyverse libraries:
+
+```{r}
+library(tidyverse)
+```
+
+Problem 1:
+
+Table 2:
+
+
+```{r}
+table2
+```
+
+
+a.	Extracting the number of TB cases per country per year for table 2:
+
+```{r}
+(cases <- filter(table2, type == "cases") %>% rename(cases = count))
+```
+
+
+
+b) b.	Extract the matching population per country per year
+
+```{r}
+(population <- filter(table2, type == "population") %>% rename(population = count))
+```
+
+
+
+c.	Divide cases by population, and multiply by 10,000
+
+```{r}
+(cases %>% mutate(population = population$population, rates = (cases / population) * 10000) %>%
+  select(country, year, rates))
+```
+
+
+d.	Storing my results in a object named rates
+
+
+```{r}
+(rates <- cases %>% mutate(population = population$population, rates = (cases / population) * 10000) %>% select(country, year, rates)) 
+
+```
+
+For table 4a and 4b:
+
+```{r}
+(United_table <- tibble(Country = table4a$country,`Year 1999` = table4a[["1999"]] / table4b[["1999"]] * 10000, `Year 2000` = table4a[["2000"]] / table4b[["2000"]] * 10000))
+
+```
+
+
+
+
+Problem 2:
+
+The code does not function because 1999 and 2000 are not syntatic names accepeted by R since they do not begin with a letter. In this case using backticks (also called grave accent) will make the code work as shown below:
+
+
+
+```{r} 
+# table4a%>%gather(1999,2000,key="year",value="cases")
+```
+
+```{r}
+table4a%>%gather(`1999`,`2000`,key="year",value="cases")
+```
+
+
+Problem 3:
+
+a.	How does the distribution of flights times within a day change over the course of the year?
+
+1 day is equivalent to (60 seconds)*(60 minutes)*(24 hours) = 86400 seconds
+
+```{r}
+library(nycflights13)
+library(lubridate)
+
+# Making the date variable
+
+flights_date <- select (flights, year, month, day, hour, minute)
+(flights_date <- mutate (flights_date, daydate = make_datetime (year,month,day, hour, minute)))
+str(flights_date)
+
+# Plotting the graph:
+
+flights_date %>% ggplot(aes(daydate)) + geom_freqpoly(binwidth = 86400) 
+
+```
+
+There appears to be no big shifts in the number of flights per day in a year. However a in january and february we can notice a small decrease relative to the rest of the months.
+
+
+b.	Compare dep_time,sched_dep_time, and dep_delay. Are they consistent. Explain your findings
+
+Sched_dep_time is the planned time for the departure of the flight. Dep_time is the actual departure time of the flight. Dep_delay is the respective delay. If those variables are consistent, the departure time should equal to the sum of the scheduled time and the delay time of the flight. 
+
+
+```{r}
+flights_time <- select (flights, sched_dep_time, dep_time, dep_delay)
+flights_time <- mutate (flights, theoretical_dep_time = sched_dep_time + dep_delay)
+flights_time <- mutate (flights_time, Difference = dep_time - theoretical_dep_time)
+select (flights_time, sched_dep_time, dep_time, dep_delay, theoretical_dep_time, Difference)
+```
+
+Not all values match becasue not all differences are equal to zero.
+
+
+
+
+c.	Confirm my hypothesis that the early departures of flights in minutes 20-30 and 50-60 are caused by scheduled flights that leave early.
+
+
+```{r}
+
+
+early_flights <- select (flights, sched_dep_time, dep_time, dep_delay, year, month, day, hour, minute)
+(early_flights <- mutate (early_flights, daydate = make_datetime (year,month,day, hour, minute)))
+(early_flights <- early_flights %>% mutate (delayed = ifelse (dep_delay <0, 1, 0)))
+(early_flights <- early_flights[which(early_flights$delayed == 1),])
+(min_c <- early_flights %>% mutate (min_strat = minute(daydate)) %>% group_by(min_strat) %>% count (min_strat))
+View(min_c)
+plot (min_c$min_strat, min_c$n)
+
+```
+I confirmed the hypothesis that early departures happen more often in minute 50-60 (largest spike at "min 0" = "min 60") and  minutes 20-30 (second spike on min 30). Both spikes are included in the given intervals.
+
+
+Problem 4:
+
+Scrapping text of the QBS site:
+
+
+```{r}
+library(rvest)
+scraping_wiki <-  read_html("https://geiselmed.dartmouth.edu/qbs/")
+head(scraping_wiki)
+h1_text <- scraping_wiki %>% html_nodes("h1") %>%html_text()
+h2_text <- scraping_wiki %>% html_nodes("h2") %>%html_text()
+length(h2_text)
+h3_text <- scraping_wiki %>% html_nodes("h3") %>%html_text()
+h4_text <- scraping_wiki %>% html_nodes("h4") %>%html_text()
+p_nodes <- scraping_wiki %>%html_nodes("p")
+p_nodes[1:6]
+p_text <- scraping_wiki %>% html_nodes("p") %>%html_text()
+length(p_text)
+ul_text <- scraping_wiki %>% html_nodes("ul") %>%html_text()
+length(ul_text)
+
+ul_text[1]
+substr(ul_text[2],start=5,stop=14)
+li_text <- scraping_wiki %>% html_nodes("li") %>%html_text()
+length(li_text)
+li_text[1:8]
+lii_text <- scraping_wiki %>% html_nodes("lii") %>%html_text()
+table_text<-scraping_wiki %>% html_nodes("table") %>%html_text()
+# all text irrespecive of headings, paragrpahs, lists, ordered list etc..
+all_text <- scraping_wiki %>%
+  html_nodes("div") %>% 
+  html_text()
+p_text
+clean_text <- scraping_wiki %>% html_nodes("mw-body") %>%html_text()
+clean_text
+
+body_text <- scraping_wiki %>%
+  html_nodes("#mw-content-text") %>% 
+  html_text()
+
+```
+
+
+Scrapping text from the link "alumni" in the QBS site:
+
+
+```{r}
+scraping_wiki <-  read_html("https://geiselmed.dartmouth.edu/qbs/people/students/alumni/")
+head(scraping_wiki)
+h1_text <- scraping_wiki %>% html_nodes("h1") %>%html_text()
+h2_text <- scraping_wiki %>% html_nodes("h2") %>%html_text()
+length(h2_text)
+h3_text <- scraping_wiki %>% html_nodes("h3") %>%html_text()
+h4_text <- scraping_wiki %>% html_nodes("h4") %>%html_text()
+p_nodes <- scraping_wiki %>%html_nodes("p")
+p_nodes[1:6]
+p_text <- scraping_wiki %>% html_nodes("p") %>%html_text()
+length(p_text)
+ul_text <- scraping_wiki %>% html_nodes("ul") %>%html_text()
+length(ul_text)
+
+ul_text[1]
+substr(ul_text[2],start=5,stop=14)
+li_text <- scraping_wiki %>% html_nodes("li") %>%html_text()
+length(li_text)
+li_text[1:8]
+lii_text <- scraping_wiki %>% html_nodes("lii") %>%html_text()
+table_text<-scraping_wiki %>% html_nodes("table") %>%html_text()
+# all text irrespecive of headings, paragrpahs, lists, ordered list etc..
+all_text <- scraping_wiki %>%
+  html_nodes("div") %>% 
+  html_text()
+p_text
+clean_text <- scraping_wiki %>% html_nodes("mw-body") %>%html_text()
+clean_text
+
+body_text <- scraping_wiki %>%
+  html_nodes("#mw-content-text") %>% 
+  html_text()
+```
+
+
+
+
