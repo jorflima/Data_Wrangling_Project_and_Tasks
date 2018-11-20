@@ -1,3 +1,5 @@
+-- First Homework
+
 select * into jlima.demographics from Demographics
 EXEC sp_RENAME '[jlima].[demographics].[tri_age]', 'Age', 'COLUMN'
 EXEC sp_RENAME '[jlima].[demographics].[gendercode]', 'Gender', 'COLUMN'
