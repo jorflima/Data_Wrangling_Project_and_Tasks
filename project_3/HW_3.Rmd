@@ -1,5 +1,5 @@
 ---
-title: "Jorge Lima HW_3 QBS 181"
+title: "Jorge Lima HW_3_QBS 181"
 output: word_document
 ---
 
